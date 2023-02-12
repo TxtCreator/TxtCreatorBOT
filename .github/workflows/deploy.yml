@@ -33,4 +33,4 @@ jobs:
             /home/ubuntu/.dotnet/dotnet build --configuration Release 
             cd bin/Release/net7.0
             screen -X -S "txtcreatorbot" quit
-            nohup screen -d -m -S txtcreatorbot /home/ubuntu/.dotnet/dotnet TxtCreatorBot.dll ${{ secrets.TOKEN }} config
+            nohup screen -d -m -S txtcreatorbot /home/ubuntu/.dotnet/dotnet TxtCreatorBOT.dll ${{ secrets.TOKEN }} config
