@@ -30,7 +30,7 @@ jobs:
         KEY: ${{ secrets.SSHKEY }}
         script: |
             cd txtcreator
+            screen -X -S "txtcreatorbot" quit
             /home/ubuntu/.dotnet/dotnet build --configuration Release 
             cd bin/Release/net7.0
-            screen -X -S "txtcreatorbot" quit
             nohup screen -d -m -S txtcreatorbot /home/ubuntu/.dotnet/dotnet TxtCreatorBOT.dll ${{ secrets.TOKEN }} config
