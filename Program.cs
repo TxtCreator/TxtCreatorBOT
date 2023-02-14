@@ -7,14 +7,15 @@ using DSharpPlus.ModalCommands;
 using DSharpPlus.ModalCommands.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
-using TxtCreatorBot.Extend;
+using TxtCreatorBOT.Extensions;
 using TxtCreatorBot.Services;
 
 var discord = new DiscordClient(new DiscordConfiguration()
 {
     Token = args[0],
     TokenType = TokenType.Bot,
-    Intents = DiscordIntents.All
+    Intents = DiscordIntents.All,
+    LogUnknownEvents = false
 });
 
 var services = new ServiceCollection() 

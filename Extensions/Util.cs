@@ -5,7 +5,7 @@ using DSharpPlus.Entities;
 using Emzi0767.Utilities;
 using Microsoft.Extensions.Logging;
 
-namespace TxtCreatorBot.Extend;
+namespace TxtCreatorBOT.Extensions;
 
 public static class Util
 {

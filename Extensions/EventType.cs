@@ -1,4 +1,4 @@
-﻿namespace TxtCreatorBot.Extend;
+﻿namespace TxtCreatorBOT.Extensions;
 public enum EventType
 {
     ClientErrored, // AsyncEventHandler<ClientErrorEventArgs>

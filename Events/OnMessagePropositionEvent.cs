@@ -1,26 +1,26 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using TxtCreatorBot.Extend;
+using TxtCreatorBOT.Extensions;
 using TxtCreatorBot.Services;
-using EventHandler = TxtCreatorBot.Extend.EventHandler;
+using EventHandler = TxtCreatorBOT.Extensions.EventHandler;
 
 namespace TxtCreatorBot.Events;
 
 public class OnMessagePropositionEvent : EventHandler
 {
     [EventHandler(EventType.MessageCreated)]
-    public static async Task OnMessagePropositionAsync(DiscordClient discord, MessageCreateEventArgs args, BotService botService, ConfigService configService)
+    public static async Task OnMessagePropositionAsync(DiscordClient discord, MessageCreateEventArgs ctx, BotService botService, ConfigService configService)
     {
-        if (args.Author.IsBot) return;
+        if (ctx.Author.IsBot) return;
         
-        if (args.Channel.Id == configService.PropositionChannelId)
+        if (ctx.Channel.Id == configService.PropositionChannelId)
         {
-            await args.Message.DeleteAsync();
+            await ctx.Message.DeleteAsync();
             var discordMessage = new DiscordMessageBuilder().AddEmbed(botService.CreateEmbed(
-                $"Propozycja użytkownika {args.Author.Username}",
-                $"{args.Message.Content}"));
-            var message = await args.Channel.SendMessageAsync(discordMessage);
+                $"Propozycja użytkownika {ctx.Author.Username}",
+                $"{ctx.Message.Content}"));
+            var message = await ctx.Channel.SendMessageAsync(discordMessage);
             await message.CreateReactionAsync(DiscordEmoji.FromName(discord, ":white_check_mark:"));
             await message.CreateReactionAsync(DiscordEmoji.FromName(discord, ":x:"));
         }

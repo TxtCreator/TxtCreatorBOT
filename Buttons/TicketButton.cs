@@ -2,7 +2,7 @@ using System.Text;
 using DSharpPlus;
 using DSharpPlus.ButtonCommands;
 using DSharpPlus.Entities;
-using TxtCreatorBot.Extend;
+using TxtCreatorBOT.Extensions;
 using TxtCreatorBot.Services;
 
 namespace TxtCreatorBot.Buttons;
@@ -105,8 +105,8 @@ public class TicketButton : ButtonCommandModule
             .AddFile($"{channel.Name}.txt", stream);
         try
         {
-            var member = (DiscordMember)user;
-            await member.SendMessageAsync(message);
+      
+            await ((DiscordMember)user).SendMessageAsync(message);
             await ctx.CreateResponseAsync(_botService.CreateEmbed("Sukces!", "Sprawdź wiadomość prywatną od bota."), true);
         }
         catch (Exception)
