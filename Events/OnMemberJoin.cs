@@ -1,16 +1,25 @@
-﻿using DSharpPlus.EventArgs;
-using TxtCreatorBOT.Extensions;
+﻿using DisCatSharp;
+using DisCatSharp.EventArgs;
 using TxtCreatorBot.Services;
-using EventHandler = TxtCreatorBOT.Extensions.EventHandler;
 
-namespace TxtCreatorBot.Events;
+namespace TxtCreatorBOT.Events;
 
-public class OnMemberJoin : EventHandler
+[EventHandler]
+public class OnMemberJoin 
 {
-    [EventHandler(EventType.GuildMemberAdded)]
-    public static async Task OnMemberJoinAsync(GuildMemberAddEventArgs ctx, BotService botService, ConfigService configService)
+    private readonly BotService _botService;
+    private readonly ConfigService _configService;
+
+    public OnMemberJoin(BotService botService, ConfigService configService)
     {
-        await ctx.Guild.Channels[configService.LobbyChannelId].SendMessageAsync(botService.CreateEmbed($"Witaj {ctx.Member.Username}", "Serdecznie dziękujemy za dołączenie na serwer!\nNie zapomnij zapoznać się z **regulaminem**", thumbnail: ctx.Member.AvatarUrl, image:"https://cdn.discordapp.com/attachments/920442986339377193/1062506391119593643/siembon.png"));
+        _botService = botService;
+        _configService = configService;
+    }
+    
+    [Event(DiscordEvent.GuildMemberAdded)]
+    public async Task OnMemberJoinAsync(DiscordClient client, GuildMemberAddEventArgs ctx)
+    {
+        await ctx.Guild.Channels[_configService.LobbyChannelId].SendMessageAsync(_botService.CreateEmbed($"Witaj {ctx.Member.Username}", "Serdecznie dziękujemy za dołączenie na serwer!\nNie zapomnij zapoznać się z **regulaminem**.").WithImageUrl("https://cdn.discordapp.com/attachments/920442986339377193/1062506391119593643/siembon.png").WithThumbnail(ctx.Member.AvatarUrl));
     }
 
 }

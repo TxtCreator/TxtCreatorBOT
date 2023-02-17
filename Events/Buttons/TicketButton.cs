@@ -1,13 +1,14 @@
 using System.Text;
-using DSharpPlus;
-using DSharpPlus.ButtonCommands;
-using DSharpPlus.Entities;
-using TxtCreatorBOT.Extensions;
+using DisCatSharp;
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+using DisCatSharp.EventArgs;
 using TxtCreatorBot.Services;
 
-namespace TxtCreatorBot.Buttons;
+namespace TxtCreatorBOT.Events.Buttons;
 
-public class TicketButton : ButtonCommandModule
+[EventHandler]
+public class TicketButton 
 {
     private readonly BotService _botService;
     private readonly ConfigService _configService;
@@ -18,36 +19,43 @@ public class TicketButton : ButtonCommandModule
         _configService = configService;
     }
 
-    [ButtonCommand("ticket")]
-    public async Task TicketCreateAsync(ButtonContext ctx, string name)
+    [Event(DiscordEvent.ComponentInteractionCreated)]
+    public async Task TicketCreateAsync(DiscordClient client, ComponentInteractionCreateEventArgs ctx)
     {
+        if (!ctx.Id.StartsWith("ticket")) return;
+        var name = ctx.Id.Split(".")[1];
+    
+     
         var user = ctx.User;
-        if (ctx.Guild.Channels.FirstOrDefault(channel => channel.Value.Name == $"{name}-{user.Id}").Value != null)
+        var guild = ctx.Guild;
+        if (guild.Channels.FirstOrDefault(channel => channel.Value.Name == $"{name}-{user.Id}").Value != null)
         {
-            await ctx.CreateResponseAsync(_botService.CreateEmbed("Błąd!", "Posiadasz już taki ticket!", "red"), true);
+            await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, _botService.CreateInteractionEmbed("Błąd!", "Posiadasz już taki ticket!", "red", ephemeral: true));
             return;
         }
 
-        var channel = await ctx.Guild.CreateTextChannelAsync($"{name}-{user.Id}",
-            ctx.Guild.Channels.First(channel => channel.Key == _configService.TicketCategoryId).Value);
-        await channel.AddOverwriteAsync((DiscordMember)ctx.User, Permissions.AccessChannels);
+        var channel = await guild.CreateTextChannelAsync($"{name}-{user.Id}",
+            guild.Channels.First(channel => channel.Key == _configService.TicketCategoryId).Value);
+        await channel.AddOverwriteAsync((DiscordMember)user, Permissions.AccessChannels);
         var message =
             new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed($"Witaj {user.Username}",
                     "Opisz problem lub aplikuj na partnera/twórcę. Na odpowiedź poczekaj cierpliwie.")).AddComponents(
-                    new DiscordButtonComponent(ButtonStyle.Danger, $"@close.{user.Id}", "Zamknij"))
+                    new DiscordButtonComponent(ButtonStyle.Danger, $"close.{user.Id}", "Zamknij"))
                 .WithAllowedMention(new UserMention(user.Id)).WithContent(user.Mention);
         await channel.SendMessageAsync(message);
-        await ctx.CreateResponseAsync(
-            _botService.CreateEmbed("Sukces!", $"Pomyślnie stworzyłeś ticket! {channel.Mention}"), true);
+        await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            _botService.CreateInteractionEmbed("Sukces!", $"Pomyślnie stworzyłeś ticket! {channel.Mention}", ephemeral: true));
     }
 
-    [ButtonCommand("close")]
-    public async Task TicketCloseAsync(ButtonContext ctx, ulong memberId)
+    [Event(DiscordEvent.ComponentInteractionCreated)]
+    public async Task TicketCloseAsync(DiscordClient client, ComponentInteractionCreateEventArgs ctx)
     {
+        if (!ctx.Id.StartsWith("close")) return;
+        var memberId = ulong.Parse(ctx.Id.Split(".")[1]);
         var channel = ctx.Channel;
         var author = ctx.User;
-
-        await ctx.CreateResponseAsync(_botService.CreateEmbed("Sukces!", "Pomyślnie zamknąłeś ticket!"), true);
+    
+        await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, _botService.CreateInteractionEmbed("Sukces!", "Pomyślnie zamknąłeś ticket!", ephemeral: true));
         var member = ctx.Guild.Members[memberId];
         if (member != null)
         {
@@ -56,7 +64,7 @@ public class TicketButton : ButtonCommandModule
             var message = new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed(
                     "Twój ticket został zamknięty!",
                     $"Zamknął go użytkownik {author.Mention}. W załączniku jest również jego zapis."))
-                .AddFile($"{channel.Name}.txt", stream);
+                .WithFile($"{channel.Name}.txt", stream);
             try
             {
                 await member.SendMessageAsync(message);
@@ -67,51 +75,54 @@ public class TicketButton : ButtonCommandModule
         if (!channel.Name.ToLower().StartsWith("zamknięty")) await channel.ModifyAsync(action => action.Name = $"zamknięty-{ctx.Channel.Name}");
         var adminMessage = new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed("Panel administracji",
             $"Ticket został zamknięty przez: {author.Mention}")).AddComponents(
-            new DiscordButtonComponent(ButtonStyle.Primary, "@remove", "Usuń"),
-            new DiscordButtonComponent(ButtonStyle.Primary, $"@reopen.{memberId}", "Otwórz ponownie"),
-            new DiscordButtonComponent(ButtonStyle.Primary, "@save", "Zapisz")
+            new DiscordButtonComponent(ButtonStyle.Primary, "remove", "Usuń"),
+            new DiscordButtonComponent(ButtonStyle.Primary, $"reopen.{memberId}", "Otwórz ponownie"),
+            new DiscordButtonComponent(ButtonStyle.Primary, "save", "Zapisz")
         );
         await channel.SendMessageAsync(adminMessage);
     }
-
-    [ButtonCommand("remove")]
-    public async Task TicketRemoveAsync(ButtonContext ctx)
+    
+    [Event(DiscordEvent.ComponentInteractionCreated)]
+    public async Task TicketRemoveAsync(DiscordClient client, ComponentInteractionCreateEventArgs ctx)
     {
+        if (ctx.Id != "remove") return;
         await ctx.Channel.DeleteAsync();
     }
-
-    [ButtonCommand("reopen")]
-    public async Task TicketReopenAsync(ButtonContext ctx, ulong memberId)
+    
+    [Event(DiscordEvent.ComponentInteractionCreated)]
+    public async Task TicketReopenAsync(DiscordClient client, ComponentInteractionCreateEventArgs ctx)
     {
+        if (!ctx.Id.StartsWith("reopen")) return;
         var channel = ctx.Channel;
+        var memberId = ulong.Parse(ctx.Id.Split(".")[1]);
         if (ctx.Guild.Members[memberId] != null)
         {
             await channel.AddOverwriteAsync(ctx.Guild.Members[memberId], Permissions.AccessChannels);
         }
-
+    
         await ctx.Message.DeleteAsync();
-        await ctx.CreateResponseAsync(_botService.CreateEmbed("Sukces!", "Pomyślnie otworzyłeś ponownie ticket!"),
-            true);
+        await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, _botService.CreateInteractionEmbed("Sukces!", "Pomyślnie otworzyłeś ponownie ticket!", ephemeral: true));
     }
     
-    [ButtonCommand("save")]
-    public async Task TicketSaveAsync(ButtonContext ctx)
+    [Event(DiscordEvent.ComponentInteractionCreated)]
+    public async Task TicketSaveAsync(DiscordClient client, ComponentInteractionCreateEventArgs ctx)
     {
+        if (ctx.Id != "save") return;
         var channel = ctx.Channel;
         var user = ctx.User;
         await using var stream = GenerateStreamFromString(await FormatTicketContent(channel));
         var message = new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed("Zapis ticketu!",
                 "Oto zapis ticketa."))
-            .AddFile($"{channel.Name}.txt", stream);
+            .WithFile($"{channel.Name}.txt", stream);
         try
         {
       
             await ((DiscordMember)user).SendMessageAsync(message);
-            await ctx.CreateResponseAsync(_botService.CreateEmbed("Sukces!", "Sprawdź wiadomość prywatną od bota."), true);
+            await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, _botService.CreateInteractionEmbed("Sukces!", "Sprawdź wiadomość prywatną od bota.", ephemeral: true));
         }
         catch (Exception)
         {
-            await ctx.CreateResponseAsync(_botService.CreateEmbed("Błąd!", "Masz zablokowane wiadomości prywatne", "red"), true);
+            await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,_botService.CreateInteractionEmbed("Błąd!", "Masz zablokowane wiadomości prywatne", "red", ephemeral: true));
         }
        
     }

@@ -1,77 +1,63 @@
 ﻿using System.Reflection;
-using DSharpPlus;
-using DSharpPlus.ButtonCommands;
-using DSharpPlus.ButtonCommands.Extensions;
-using DSharpPlus.Entities;
-using DSharpPlus.ModalCommands;
-using DSharpPlus.ModalCommands.Extensions;
-using DSharpPlus.SlashCommands;
+using DisCatSharp;
+using DisCatSharp.ApplicationCommands;
+using DisCatSharp.Entities;
+using DisCatSharp.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using TxtCreatorBOT.Extensions;
+using TxtCreatorBOT.Database;
 using TxtCreatorBot.Services;
-
-var discord = new DiscordClient(new DiscordConfiguration()
-{
-    Token = args[0],
-    TokenType = TokenType.Bot,
-    Intents = DiscordIntents.All,
-    LogUnknownEvents = false
-});
 
 var services = new ServiceCollection() 
     .AddSingleton(ConfigService.Create(args[1]))
     .AddSingleton<BotService>()
+    .AddTransient<UserService>()
+    .AddDbContext<TxtCreatorDbContext>(ServiceLifetime.Transient, ServiceLifetime.Transient)
     .BuildServiceProvider();
 
-#region commands
+var client = new DiscordClient(new DiscordConfiguration()
+{
+    Token = args[0],
+    TokenType = TokenType.Bot,
+    Intents = DiscordIntents.All,
+    MobileStatus = true,
+    ServiceProvider = services
+});
 
-var slash = discord.UseSlashCommands(new SlashCommandsConfiguration()
+using (var serviceScope = services.CreateScope())
 {
-    Services = services
-});
-var buttons = discord.UseButtonCommands(new ButtonCommandsConfiguration() {
-    ArgumentSeparator = ".",
-    Prefix = "@",
-    Services = services
-});
-var modals = discord.UseModalCommands(new ModalCommandsConfiguration()
+    var dbContext = serviceScope.ServiceProvider.GetRequiredService<TxtCreatorDbContext>();
+    dbContext.Database.Migrate();
+}
+
+#region create all modules
+
+var slash = client.UseApplicationCommands(new ApplicationCommandsConfiguration()
 {
-    Seperator = ".",
-    Prefix = "@",
-    Services = services
+    ServiceProvider = services
 });
+
 
 #endregion
 
-#region register commands
+#region register all modules
 
 var assembly = Assembly.GetExecutingAssembly();
-slash.RegisterCommands(assembly);
-buttons.RegisterButtons(assembly);
-modals.RegisterModals(assembly);
-discord.RegisterEvents(assembly, services);
+slash.RegisterGlobalCommands(assembly);
+client.RegisterEventHandlers(assembly);
 
 #endregion
 
-#region error handle
+#region error handling
 
 slash.SlashCommandErrored += async (_, eventArgs) =>
 {
     Console.WriteLine(eventArgs.Exception);
-    await eventArgs.Context.CreateResponseAsync(services.GetRequiredService<BotService>().CreateEmbed("Błąd!", $"Coś poszło nie tak: `{eventArgs.Exception.Message}`", "red"), true);
+    await eventArgs.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithColor(new DiscordColor(255, 0, 0)).WithTitle("Błąd!").WithDescription($"Coś poszło nie tak: {eventArgs.Exception.Message.InlineCode()}")).AsEphemeral());
 };
-buttons.ButtonCommandErrored += async (_, eventArgs) =>
-{
-    Console.WriteLine(eventArgs.Exception);
-    await eventArgs.Context.CreateResponseAsync(services.GetRequiredService<BotService>().CreateEmbed("Błąd!", $"Coś poszło nie tak: `{eventArgs.Exception.Message}`", "red"), true);
-};
-modals.ModalCommandErrored += async (_, eventArgs) =>
-{
-    Console.WriteLine(eventArgs.Exception);
-    await eventArgs.Context.CreateResponseAsync(services.GetRequiredService<BotService>().CreateEmbed("Błąd!", $"Coś poszło nie tak: `{eventArgs.Exception.Message}`", "red"), true);
-};
+
 
 #endregion
 
-await discord.ConnectAsync(new DiscordActivity("rozkazów.", ActivityType.ListeningTo));
+await client.ConnectAsync(new DiscordActivity("rozkazów.", ActivityType.ListeningTo));
 await Task.Delay(-1);
