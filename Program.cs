@@ -3,6 +3,10 @@ using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.Interactivity;
+using DisCatSharp.Interactivity.Enums;
+using DisCatSharp.Interactivity.EventHandling;
+using DisCatSharp.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TxtCreatorBOT.Database;
@@ -34,9 +38,15 @@ using (var serviceScope = services.CreateScope())
 
 var slash = client.UseApplicationCommands(new ApplicationCommandsConfiguration()
 {
-    ServiceProvider = services
+    ServiceProvider = services,
+    EnableDefaultHelp = false
 });
-
+client.UseInteractivity(
+    new InteractivityConfiguration()
+    {
+        AckPaginationButtons = true
+    }
+    );
 
 #endregion
 

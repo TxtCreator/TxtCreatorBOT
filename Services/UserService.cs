@@ -40,4 +40,19 @@ public class UserService
         _dbContext.Remove(receivedUser);
         await _dbContext.SaveChangesAsync();
     }
+    
+    public async Task<Dictionary<int, List<UserModel>>> GetAllUserModelsAsync()
+    {
+        var dictionary = new Dictionary<int, List<UserModel>>();
+        var allProfiles = await _dbContext.Users.OrderByDescending(user => user.Warns).ToListAsync();
+        var i = 0;
+        while (allProfiles.Count > 0)
+        {
+            var tenProfiles = allProfiles.Take(10).ToList();
+            tenProfiles.ForEach(profile => allProfiles.Remove(profile));
+            dictionary.Add(i, tenProfiles);
+            i++;
+        }
+        return dictionary;
+    }
 }

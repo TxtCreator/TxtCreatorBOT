@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="DisCatSharp" Version="10.3.3-nightly-016" />
       <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.3.3-nightly-016" />
+      <PackageReference Include="DisCatSharp.Interactivity" Version="10.3.3-nightly-016" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
         <PrivateAssets>all</PrivateAssets>
