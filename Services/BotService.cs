@@ -26,31 +26,4 @@ public class BotService
 
         return embed;
     }
-    
-    public DiscordInteractionResponseBuilder CreateInteractionEmbed(string title, string description, string color = "", string image = "", string thumbnail = "", bool ephemeral = false)
-    {
-        DiscordColor discordColor;
-        if (!string.IsNullOrWhiteSpace(color))
-        {
-            var colorFromName = Color.FromName(color);
-            discordColor = new DiscordColor(colorFromName.R, colorFromName.G, colorFromName.B);
-        }
-        else
-        {
-            discordColor = new DiscordColor(8, 159, 255);
-        }
-        
-        var embed = new DiscordEmbedBuilder()
-            .WithTitle(title)
-            .WithDescription(description)
-            .WithImageUrl(image)
-            .WithThumbnail(thumbnail)
-            .WithColor(discordColor)
-            .WithTimestamp(DateTimeOffset.UtcNow);
-
-        return new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral(ephemeral);
-    }
-    
-
-    
 }

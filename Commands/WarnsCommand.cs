@@ -2,7 +2,7 @@
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
-using DisCatSharp.Enums;
+using DisCatSharp.Extensions;
 using TxtCreatorBot.Services;
 
 namespace TxtCreatorBot.Commands;
@@ -40,13 +40,13 @@ public class WarnsCommand : ApplicationCommandsModule
 
         if (isSuccess)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, _botService.CreateInteractionEmbed("Sukces!",
-                message, ephemeral: true));
+            await ctx.CreateResponseAsync(_botService.CreateEmbed("Sukces!",
+                message), true);
         }
         else
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,_botService.CreateInteractionEmbed("Błąd!",
-                "Coś poszło nie tak, najprawdopodobniej chciałeś dodać/odjąć ostrzeżenia na minusowej liczbie.", "red", ephemeral: true));
+            await ctx.CreateResponseAsync(_botService.CreateEmbed("Błąd!",
+                "Coś poszło nie tak, najprawdopodobniej chciałeś dodać/odjąć ostrzeżenia na minusowej liczbie.", "red"), true);
         }
     }
 }

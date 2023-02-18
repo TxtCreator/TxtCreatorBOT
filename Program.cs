@@ -2,10 +2,12 @@
 using DisCatSharp;
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.Entities;
-using DisCatSharp.Enums;
+using DisCatSharp.Extensions;
+using DisCatSharp.Extensions.Button;
+using DisCatSharp.Extensions.Button.Extensions;
+using DisCatSharp.Extensions.Modal;
+using DisCatSharp.Extensions.Modal.Extensions;
 using DisCatSharp.Interactivity;
-using DisCatSharp.Interactivity.Enums;
-using DisCatSharp.Interactivity.EventHandling;
 using DisCatSharp.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,12 +43,22 @@ var slash = client.UseApplicationCommands(new ApplicationCommandsConfiguration()
     ServiceProvider = services,
     EnableDefaultHelp = false
 });
+var buttons = client.UseButtonCommands(new ButtonCommandsConfiguration() {
+    ServiceProvider = services,
+    ArgumentSeparator = ".",
+    Prefix = "@"
+});
+var modals = client.UseModalCommands(new ModalCommandsConfiguration()
+{
+    ServiceProvider = services,
+    ArgumentSeparator = ".",
+    Prefix = "@"
+});
 client.UseInteractivity(
     new InteractivityConfiguration()
     {
         AckPaginationButtons = true
-    }
-    );
+    });
 
 #endregion
 
@@ -54,6 +66,8 @@ client.UseInteractivity(
 
 var assembly = Assembly.GetExecutingAssembly();
 slash.RegisterGlobalCommands(assembly);
+buttons.RegisterButtons(assembly);
+modals.RegisterModals(assembly);
 client.RegisterEventHandlers(assembly);
 
 #endregion
@@ -63,9 +77,16 @@ client.RegisterEventHandlers(assembly);
 slash.SlashCommandErrored += async (_, eventArgs) =>
 {
     Console.WriteLine(eventArgs.Exception);
-    await eventArgs.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithColor(new DiscordColor(255, 0, 0)).WithTitle("Błąd!").WithDescription($"Coś poszło nie tak: {eventArgs.Exception.Message.InlineCode()}")).AsEphemeral());
+    await eventArgs.Context.CreateResponseAsync(new DiscordEmbedBuilder().WithTitle("Błąd!").WithDescription($"Coś poszło nie tak: `{eventArgs.Exception.Message}`").WithColor(new DiscordColor(255, 0, 0)), true);
 };
-
+buttons.ButtonCommandErrored += async (_, eventArgs) =>
+{
+    Console.WriteLine(eventArgs.Exception);
+    await eventArgs.Context.CreateResponseAsync(new DiscordEmbedBuilder().WithTitle("Błąd!").WithDescription($"Coś poszło nie tak: `{eventArgs.Exception.Message}`").WithColor(new DiscordColor(255, 0, 0)), true);};
+modals.ModalCommandErrored += async (_, eventArgs) =>
+{
+    Console.WriteLine(eventArgs.Exception);
+    await eventArgs.Context.CreateResponseAsync(new DiscordEmbedBuilder().WithTitle("Błąd!").WithDescription($"Coś poszło nie tak: `{eventArgs.Exception.Message}`").WithColor(new DiscordColor(255, 0, 0)), true);};
 
 #endregion
 

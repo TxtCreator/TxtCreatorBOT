@@ -2,11 +2,9 @@
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.Entities;
 using DisCatSharp.Enums;
+using DisCatSharp.Extensions;
 using DisCatSharp.Interactivity;
-using DisCatSharp.Interactivity.Enums;
-using DisCatSharp.Interactivity.EventHandling;
 using DisCatSharp.Interactivity.Extensions;
 using TxtCreatorBot.Services;
 
@@ -26,8 +24,7 @@ public class LeadBoardCommand : ApplicationCommandsModule
     [SlashCommand("ranking", "Pokazuje ranking osób z ostrzeżeniami.")]
     public async Task LeadBoardAsync(InteractionContext ctx)
     {
-        await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-            _botService.CreateInteractionEmbed("Chwila..", "Trwa generowanie rankingu...", ephemeral: true));
+        await ctx.CreateResponseAsync(_botService.CreateEmbed("Chwila..", "Trwa generowanie rankingu..."), true);
         var pages = new List<Page>();
         var users = await _userService.GetAllUserModelsAsync();
 

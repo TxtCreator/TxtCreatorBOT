@@ -27,4 +27,10 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="DisCatSharp.Extensions">
+        <HintPath>..\DisCatSharp.Extensions\bin\Release\net7.0\publish\DisCatSharp.Extensions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

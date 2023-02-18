@@ -14,7 +14,7 @@ public class EmbedCommand : ApplicationCommandsModule
     {
         var modal = new DiscordInteractionModalBuilder()
             .WithTitle("Stwórz embed")
-            .WithCustomId($"embed.{channel.Id}")
+            .WithCustomId($"@embed.{channel.Id}")
             .AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small, "title", "Tytuł"))
             .AddTextComponent(new DiscordTextComponent(TextComponentStyle.Paragraph,"description", "Treść"))
             .AddTextComponent(new DiscordTextComponent(TextComponentStyle.Small,"color", "Kolor", required: false))
