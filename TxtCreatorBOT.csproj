@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="DisCatSharp" Version="10.3.3-nightly-016" />
       <PackageReference Include="DisCatSharp.ApplicationCommands" Version="10.3.3-nightly-016" />
+      <PackageReference Include="DisCatSharp.Extensions" Version="1.0.0" />
       <PackageReference Include="DisCatSharp.Interactivity" Version="10.3.3-nightly-016" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
@@ -25,12 +26,6 @@
       <None Update="config.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="DisCatSharp.Extensions">
-        <HintPath>..\DisCatSharp.Extensions\bin\Release\net7.0\publish\DisCatSharp.Extensions.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
