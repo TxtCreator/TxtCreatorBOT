@@ -35,7 +35,7 @@ public class Giveaway
                 new DiscordEmbedField("Data zakończenia", $"{GiveawayEnd.Timestamp()}")
                 ));
         await Message.CreateReactionAsync(emoji);
-        var timer = new Timer(600);
+        var timer = new Timer(60000);
         async Task OnTimerOnElapsedAsync()
         {
             Minutes--;
