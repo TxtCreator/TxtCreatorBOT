@@ -1,11 +1,10 @@
-﻿using System.Threading.Tasks;
-using DisCatSharp.ApplicationCommands;
+﻿using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
 using DisCatSharp.Entities;
 using DisCatSharp.Enums;
 
-namespace TxtCreatorBot.Commands;
+namespace TxtCreatorBOT.Commands;
 
 public class EmbedCommand : ApplicationCommandsModule
 {

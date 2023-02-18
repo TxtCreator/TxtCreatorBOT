@@ -2,13 +2,12 @@
 using DisCatSharp.ApplicationCommands;
 using DisCatSharp.ApplicationCommands.Attributes;
 using DisCatSharp.ApplicationCommands.Context;
-using DisCatSharp.Enums;
 using DisCatSharp.Extensions;
 using DisCatSharp.Interactivity;
 using DisCatSharp.Interactivity.Extensions;
 using TxtCreatorBot.Services;
 
-namespace TxtCreatorBot.Commands;
+namespace TxtCreatorBOT.Commands;
 
 public class LeadBoardCommand : ApplicationCommandsModule
 {

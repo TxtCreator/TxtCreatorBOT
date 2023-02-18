@@ -5,7 +5,7 @@ using DisCatSharp.Enums;
 using DisCatSharp.Extensions;
 using TxtCreatorBot.Services;
 
-namespace TxtCreatorBot.Commands;
+namespace TxtCreatorBOT.Commands;
 
 public class ProfileCommand : ApplicationCommandsModule
 {

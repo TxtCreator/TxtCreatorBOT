@@ -15,4 +15,5 @@ public class ConfigService
     public ulong LobbyChannelId { get; init; }
     public ulong VerificationRoleId { get; init; }
     public ulong PropositionChannelId { get; init; }
+    public string EmojiName { get; init; }
 }

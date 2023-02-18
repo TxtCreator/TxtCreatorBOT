@@ -5,7 +5,7 @@ using DisCatSharp.Entities;
 using DisCatSharp.Extensions;
 using TxtCreatorBot.Services;
 
-namespace TxtCreatorBot.Commands;
+namespace TxtCreatorBOT.Commands;
 
 public class WarnsCommand : ApplicationCommandsModule
 {
