@@ -1,27 +1,20 @@
 name: Deploy
 
-on: [push]
+on:
+  push:
+    paths:
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '**.json'
+  workflow_dispatch:
 
 jobs:
   build:
-
+    name: Build and deploy 
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v1
-
-    - name: Copy repository contents
-      uses: appleboy/scp-action@master
-      env:
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
-        PORT: ${{ secrets.PORT }}
-        KEY: ${{ secrets.SSHKEY }}
-      with:
-        source: "."
-        target: "/home/ubuntu/txtcreator"
-
-    - name: Executing remote command
+    - name: ssh commands
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -29,8 +22,10 @@ jobs:
         PORT: ${{ secrets.PORT }}
         KEY: ${{ secrets.SSHKEY }}
         script: |
-            cd txtcreator
-            screen -X -S "txtcreatorbot" quit
-            /home/ubuntu/.dotnet/dotnet build --configuration Release 
-            cd bin/Release/net7.0
-            nohup screen -d -m -S txtcreatorbot /home/ubuntu/.dotnet/dotnet TxtCreatorBOT.dll ${{ secrets.TOKEN }} config
+          cd txtcreatorbot
+          git clone https://github.com/TxtCreator/TxtCreatorBOT || (cd TxtCreatorBOT ; git fetch --all ; git reset --hard origin/main)
+          cd TxtCreatorBOT
+          screen -X -S "txtcreatorbot" quit
+          /home/ubuntu/.dotnet/dotnet build --configuration Release
+          cd bin/Release/net7.0
+          nohup screen -d -m -S txtcreatorbot /home/ubuntu/.dotnet/dotnet TxtCreatorBOT.dll ${{ secrets.TOKEN }} config
