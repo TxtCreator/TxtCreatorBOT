@@ -24,13 +24,22 @@ public class OnMessagePropositionEvent
         
         if (ctx.Channel.Id == _configService.PropositionChannelId)
         {
-            await ctx.Message.DeleteAsync();
+            var message = ctx.Message;
+            await message.DeleteAsync();
+            if (ctx.Message.Attachments.Count != 0)
+            {
+                try
+                {
+                    await ctx.Author.SendMessageAsync(_botService.CreateEmbed("Błąd!", "Nie możesz wysłać propozycji ze zdjęciem!", "red"));
+                } catch (Exception) {}
+                return;
+            }
             var discordMessage = new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed(
                 $"Propozycja użytkownika {ctx.Author.Username}",
-                $"{ctx.Message.Content}"));
-            var message = await ctx.Channel.SendMessageAsync(discordMessage);
-            await message.CreateReactionAsync(DiscordEmoji.FromName(client, ":white_check_mark:"));
-            await message.CreateReactionAsync(DiscordEmoji.FromName(client, ":x:"));
+                $"{message.Content}"));
+            var sendMessage = await ctx.Channel.SendMessageAsync(discordMessage);
+            await sendMessage.CreateReactionAsync(DiscordEmoji.FromName(client, ":white_check_mark:"));
+            await sendMessage.CreateReactionAsync(DiscordEmoji.FromName(client, ":x:"));
         }
     }
 }

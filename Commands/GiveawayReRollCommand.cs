@@ -34,7 +34,7 @@ public class GiveawayReRollCommand : ApplicationCommandsModule
         }
         catch (Exception)
         {
-            await ctx.CreateResponseAsync(_botService.CreateEmbed("Błąd!", "Nie istnieje taka wiadomość.", "red"));
+            await ctx.CreateResponseAsync(_botService.CreateEmbed("Błąd!", "Nie istnieje taka wiadomość.", "red"), true);
             return;
         }
 
