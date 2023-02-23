@@ -50,17 +50,20 @@ public class TicketButton : ButtonCommandModule
         var member = ctx.Guild.Members[memberId];
         if (member != null)
         {
-            await channel.DeleteOverwriteAsync(member);
-            await using var stream = GenerateStreamFromString(await FormatTicketContent(channel));
-            var message = new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed(
-                    "Twój ticket został zamknięty!",
-                    $"Zamknął go użytkownik {author.Mention}. W załączniku jest również jego zapis."))
-                .WithFile($"{channel.Name}.txt", stream);
-            try
+            _ = Task.Run(async () =>
             {
-                await member.SendMessageAsync(message);
-            }
-            catch (Exception) {}
+                await channel.DeleteOverwriteAsync(member);
+                await using var stream = GenerateStreamFromString(await FormatTicketContent(channel));
+                var message = new DiscordMessageBuilder().AddEmbed(_botService.CreateEmbed(
+                        "Twój ticket został zamknięty!",
+                        $"Zamknął go użytkownik {author.Mention}. W załączniku jest również jego zapis."))
+                    .WithFile($"{channel.Name}.txt", stream);
+                try
+                {
+                    await member.SendMessageAsync(message);
+                }
+                catch (Exception) {}
+            });
         }
         
         if (!channel.Name.ToLower().StartsWith("zamknięty")) await channel.ModifyAsync(action => action.Name = $"zamknięty-{ctx.Channel.Name}");
